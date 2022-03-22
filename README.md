@@ -8,6 +8,7 @@ Make sure to first make a new binding:
 ```go
 myBinding, err := libappimagego.NewLibAppImageBindings()
 appImagePath := "/home/aditya/test.appimage"
+debug := false
 ```
 
 Now Access All The Functions You Want:
@@ -15,8 +16,8 @@ Now Access All The Functions You Want:
 shallBeIntegrated := myBinding.ShallNotBeIntegrated(appImagePath)
 
 if shallBeIntegrated == true {
-    err = myBinding.Register(appImagePath)
-    err = myBinding.Unregister(appImagePath)
+    err = myBinding.Register(appImagePath, debug)
+    err = myBinding.Unregister(appImagePath, debug)
 }
 
 isATerminalApp := myBinding.IsTerminalApp(appImagePath)
@@ -28,7 +29,7 @@ isATerminalApp := myBinding.IsTerminalApp(appImagePath)
   libappimagego.APPIMAGE_TYPE_1
   libappimagego.APPIMAGE_TYPE_2
 */
-appImageType := myBinding.GetType(appImagePath)
+appImageType := myBinding.GetType(appImagePath, debug)
 
 // Make sure to close the bindings after using it.
 myBinding.Close()

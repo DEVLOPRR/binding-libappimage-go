@@ -34,10 +34,10 @@ type libAppImageBind struct {
 }
 
 type LibAppImage interface {
-	Register(filePath string) error
-	Unregister(filePath string) error
+	Register(filePath string, debug bool) error
+	Unregister(filePath string, debug bool) error
 	ShallNotBeIntegrated(filePath string) bool
-	GetType(filePath string) int
+	GetType(filePath string, debug bool) int
 	IsTerminalApp(filePath string) bool
 	Close()
 }
@@ -100,8 +100,11 @@ func NewLibAppImageBindings() (LibAppImage, error) {
 }
 
 // Register a appimage
-func (bind *libAppImageBind) Register(filePath string) error {
-	if bind.appimage_register_in_system(C.CString(filePath), 1) != 0 {
+func (bind *libAppImageBind) Register(filePath string, debug bool) error {
+	verbose := 1
+	if debug == true { verbose = 1 } else { verbose = 0 }
+
+	if bind.appimage_register_in_system(C.CString(filePath), verbose) != 0 {
 		return fmt.Errorf("unregister failed")
 	}
 
@@ -109,8 +112,11 @@ func (bind *libAppImageBind) Register(filePath string) error {
 }
 
 // Unregister a appimage
-func (bind *libAppImageBind) Unregister(filePath string) error {
-	if bind.appimage_unregister_in_system(C.CString(filePath), 1) != 0 {
+func (bind *libAppImageBind) Unregister(filePath string, debug bool) error {
+	verbose := 1
+	if debug == true { verbose = 1 } else { verbose = 0 }
+
+	if bind.appimage_unregister_in_system(C.CString(filePath), verbose) != 0 {
 		return fmt.Errorf("unregister failed")
 	}
 
@@ -128,8 +134,11 @@ func (bind *libAppImageBind) IsTerminalApp(filePath string) bool {
 }
 
 // Close the binding
-func (bind *libAppImageBind) GetType(filePath string) int {
-	return bind.appimage_get_type(C.CString(filePath), 1)
+func (bind *libAppImageBind) GetType(filePath string, debug bool) int {
+	verbose := 1
+	if debug == true { verbose = 1 } else { verbose = 0 }
+
+	return bind.appimage_get_type(C.CString(filePath), verbose)
 }
 
 // Function to close the binding
