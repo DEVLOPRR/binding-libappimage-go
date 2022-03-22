@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	APPIMAGE_FORMAT_INVALID = -1 // Not an AppImage file
-	APPIMAGE_FORMAT_LEGACY = 0 // portable binaries that look and behave like AppImages but do not follow the standard
-	APPIMAGE_FORMAT_1 = 1 // https://github.com/AppImage/AppImageSpec/blob/master/draft.md#type-1-image-format
-	APPIMAGE_FORMAT_2 = 2 // https://github.com/AppImage/AppImageSpec/blob/master/draft.md#type-2-image-format
+	APPIMAGE_TYPE_INVALID = -1 // Not an AppImage file
+	APPIMAGE_TYPE_LEGACY = 0 // portable binaries that look and behave like AppImages but do not follow the standard
+	APPIMAGE_TYPE_1 = 1 // https://github.com/AppImage/AppImageSpec/blob/master/draft.md#type-1-image-format
+	APPIMAGE_TYPE_2 = 2 // https://github.com/AppImage/AppImageSpec/blob/master/draft.md#type-2-image-format
 )
 
 type libAppImageBind struct {
@@ -127,12 +127,12 @@ func (bind *libAppImageBind) IsTerminalApp(filePath string) bool {
 	return bind.appimage_is_terminal_app(C.CString(filePath)) != 0
 }
 
-// Function to close the binding
-func (bind *libAppImageBind) Close() {
-	_ = bind.lib.Close()
-}
-
 // Close the binding
 func (bind *libAppImageBind) GetType(filePath string) int {
 	return bind.appimage_get_type(C.CString(filePath), 1)
+}
+
+// Function to close the binding
+func (bind *libAppImageBind) Close() {
+	_ = bind.lib.Close()
 }
