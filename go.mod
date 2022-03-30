@@ -1,4 +1,4 @@
-module github.com/DEVLOPRR/libappimage-go
+module libappimage-go
 
 go 1.18
 
