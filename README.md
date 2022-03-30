@@ -21,6 +21,7 @@ if shallBeIntegrated == true {
 }
 
 isATerminalApp := myBinding.IsTerminalApp(appImagePath)
+isRegistered := myBinding.IsRegistered(appImagePath)
 
 /*
  TYPE CAN BE:
