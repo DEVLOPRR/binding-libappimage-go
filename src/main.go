@@ -26,7 +26,8 @@ type libAppImageBind struct {
 	// Returns boolean based on if the appimage got sucessfuly unregistered on not
 	appimage_unregister_in_system    func(path *C.char, verbose int) int
 
-	appimage_is_registered_in_system func(path *C.char) bool
+	// Returns 1 if the appimage is registered
+	appimage_is_registered_in_system func(path *C.char) int
 
 	// Returns AppImage Type (0, 1, 2): https://github.com/AppImage/AppImageSpec/blob/master/draft.md#image-format
 	appimage_get_type                func(path *C.char, verbose int) int
@@ -38,7 +39,8 @@ type libAppImageBind struct {
 type LibAppImage interface {
 	Register(filePath string, debug bool) error
 	Unregister(filePath string, debug bool) error
-	ShallNotBeIntegrated(filePath string) bool
+	IsRegistered(filePath string) bool
+	ShallAppImageBeRegistered(filePath string) bool
 	GetType(filePath string, debug bool) int
 	IsTerminalApp(filePath string) bool
 	Close()
@@ -73,7 +75,7 @@ func NewLibAppImageBindings() (LibAppImage, error) {
 		return nil, err
 	}
 
-	err = bindings.lib.Sym("appimage_shall_not_be_integrated", &bindings.appimage_shall_not_be_integrated)
+	err = bindings.lib.Sym("appimage_register_in_system", &bindings.appimage_register_in_system)
 	if err != nil {
 		return nil, err
 	}
@@ -83,12 +85,12 @@ func NewLibAppImageBindings() (LibAppImage, error) {
 		return nil, err
 	}
 
-	err = bindings.lib.Sym("appimage_register_in_system", &bindings.appimage_register_in_system)
+	err = bindings.lib.Sym("appimage_is_registered_in_system", &bindings.appimage_is_registered_in_system)
 	if err != nil {
 		return nil, err
 	}
 
-	err = bindings.lib.Sym("appimage_is_registered_in_system", &bindings.appimage_is_registered_in_system)
+	err = bindings.lib.Sym("appimage_shall_not_be_integrated", &bindings.appimage_shall_not_be_integrated)
 	if err != nil {
 		return nil, err
 	}
@@ -106,33 +108,14 @@ func NewLibAppImageBindings() (LibAppImage, error) {
 	return &bindings, nil
 }
 
-// Register a appimage
-func (bind *libAppImageBind) Register(filePath string, debug bool) error {
-	verbose := 1
-	if debug { verbose = 1 } else { verbose = 0 }
-
-	if bind.appimage_register_in_system(C.CString(filePath), verbose) != 0 {
-		return fmt.Errorf("unregister failed")
-	}
-
-	return nil
-}
-
-// Unregister a appimage
-func (bind *libAppImageBind) Unregister(filePath string, debug bool) error {
-	verbose := 1
-	if debug { verbose = 1 } else { verbose = 0 }
-
-	if bind.appimage_unregister_in_system(C.CString(filePath), verbose) != 0 {
-		return fmt.Errorf("unregister failed")
-	}
-
-	return nil
+// Check if a appimage is registered or not
+func (bind *libAppImageBind) IsRegistered(filePath string) bool {
+	return bind.appimage_is_registered_in_system(C.CString(filePath)) == 1
 }
 
 // Returns a boolean if a appimage should be integrated or not
-func (bind *libAppImageBind) ShallNotBeIntegrated(filePath string) bool {
-	return bind.appimage_shall_not_be_integrated(C.CString(filePath)) != 0
+func (bind *libAppImageBind) ShallAppImageBeRegistered(filePath string) bool {
+	return !(bind.appimage_shall_not_be_integrated(C.CString(filePath)) != 0)
 }
 
 // Function to close the binding
@@ -142,10 +125,7 @@ func (bind *libAppImageBind) IsTerminalApp(filePath string) bool {
 
 // Close the binding
 func (bind *libAppImageBind) GetType(filePath string, debug bool) int {
-	verbose := 1
-	if debug { verbose = 1 } else { verbose = 0 }
-
-	return bind.appimage_get_type(C.CString(filePath), verbose)
+	return bind.appimage_get_type(C.CString(filePath), boolToInt(debug))
 }
 
 // Function to close the binding
