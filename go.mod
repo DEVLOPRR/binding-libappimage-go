@@ -1,4 +1,4 @@
-module libappimage-go
+module github.com/pegvin/libappimage-go
 
 go 1.18
 
